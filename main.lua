@@ -9,17 +9,19 @@ function love.load()
     -- heighth and width for the whole tileset
     local tilesetW, tilesetH = Tileset:getWidth(), Tileset:getHeight()
 
-    Quads = 
-    {
-        -- grass
-        love.graphics.newQuad(0, 0, TileW, TileH, tilesetW, tilesetH),
-        -- box
-        love.graphics.newQuad(32, 0, TileW, TileH, tilesetW, tilesetH),
-        -- flower grass
-        love.graphics.newQuad(0, 32, TileW, TileH, tilesetW, tilesetH),
-        -- boxtop
-        love.graphics.newQuad(32, 32, TileW, TileH, tilesetW, tilesetH)
-    }
+    local quadInfo = {
+        {  0,  0 }, -- 1 = grass 
+        { 32,  0 }, -- 2 = box
+        {  0, 32 }, -- 3 = flowers
+        { 32, 32 }  -- 4 = boxTop
+      }
+
+    Quads = {}
+    -- ipairs does i ++ on current loop and quadinfo loop
+    for i, info in ipairs(quadInfo) do
+        -- info[i] = x, info[2] = y
+        Quads[i] = love.graphics.newQuad(info[1], info[2], TileW, TileH, tilesetW, tilesetH)
+    end
 
     TileTable = 
     {
@@ -46,11 +48,10 @@ end
 
 
 function love.draw()
-    for rowIdx = 1, #TileTable do
-        local row = TileTable[rowIdx]
-        for colIdx = 1, #row do
-            local number = row[colIdx]
-            love.graphics.draw(Tileset, Quads[number], (colIdx-1) * TileW, (rowIdx-1) * TileH)
+    for rowIndex, row in ipairs(TileTable) do
+        for columnIndex, number in ipairs(row) do
+            local x,y = (columnIndex-1)*TileW, (rowIndex-1)*TileH
+            love.graphics.draw(Tileset, Quads[number], x, y)
         end
     end
 end
