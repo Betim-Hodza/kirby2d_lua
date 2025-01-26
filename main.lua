@@ -1,6 +1,4 @@
-
-
-function love.load()
+function loadMap()
     Tileset = love.graphics.newImage('countryside.png')
 
     -- tell love the width and heigth for each tile
@@ -10,51 +8,81 @@ function love.load()
     local tilesetW, tilesetH = Tileset:getWidth(), Tileset:getHeight()
 
     local quadInfo = {
-        {  0,  0 }, -- 1 = grass 
-        { 32,  0 }, -- 2 = box
-        {  0, 32 }, -- 3 = flowers
-        { 32, 32 },  -- 4 = boxTop
-        { 64, 0 },  -- 5 = cat
-        { 96, 0 },  -- 6 = old window
-        { 64, 32 },  -- 7 = sign in grass
-        { 86, 32 },  -- 8 = red happy face
+        { '.',  0,  0 }, -- 1 = grass 
+        { '#', 32,  0 }, -- 2 = box
+        { '*', 0, 32 }, -- 3 = flowers
+        { '^', 32, 32 },  -- 4 = boxTop
+        { '3', 64, 0 },  -- 5 = cat
+        { 'W', 96, 0 },  -- 6 = old window
+        { 'S', 64, 32 },  -- 7 = sign in grass
+        { '>', 96, 32 },  -- 8 = red happy face
     }
 
     Quads = {}
     -- ipairs does i ++ on current loop and quadinfo loop
-    for i, info in ipairs(quadInfo) do
+    for _, info in ipairs(quadInfo) do
         -- info[i] = x, info[2] = y
-        Quads[i] = love.graphics.newQuad(info[1], info[2], TileW, TileH, tilesetW, tilesetH)
+        Quads[info[1]] = love.graphics.newQuad(info[2], info[3], TileW, TileH, tilesetW, tilesetH)
     end
 
-    TileTable = {
-        { 4,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,4 },
-        { 4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,4 },
-        { 4,1,3,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,4 },
-        { 4,1,1,1,1,1,5,1,2,1,1,2,1,1,1,1,1,1,1,1,6,1,1,1,4 },
-        { 4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4 },
-        { 4,1,1,4,1,1,1,1,1,2,2,1,1,4,1,1,1,4,1,4,2,2,1,1,4 },
-        { 4,1,1,4,1,1,1,1,4,3,3,4,1,2,1,1,1,2,1,4,1,1,1,1,4 },
-        { 4,1,1,4,1,1,1,1,4,3,3,4,1,1,4,1,4,1,1,4,2,2,1,1,4 },
-        { 4,1,1,4,1,1,1,1,4,3,3,4,1,1,2,1,2,1,1,4,1,1,1,1,4 },           
-        { 4,1,1,4,1,1,1,1,2,3,3,2,1,1,1,4,1,1,1,4,1,1,1,1,4 },
-        { 4,1,1,2,2,2,2,1,1,2,2,1,1,1,1,2,1,3,1,2,2,2,1,1,4 },
-        { 4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,6,1,4 },
-        { 4,1,1,1,1,1,1,1,1,2,1,1,1,1,2,2,4,1,1,1,7,1,1,1,4 },
-        { 4,1,1,1,1,1,1,1,4,3,4,1,1,1,1,1,2,1,1,1,1,1,1,1,4 },
-        { 4,1,1,3,1,1,1,1,2,3,2,1,1,1,1,2,1,1,1,1,1,1,1,1,4 },
-        { 4,1,1,1,1,1,1,1,1,2,1,1,2,1,2,1,1,1,1,1,1,1,3,1,4 },
-        { 4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,1,1,1,4 },
-        { 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2 }
-    }
+    local tileString = [[
+^#######################^
+^....................*..^
+^..*....................^
+^.###....#...^*^........^
+^.^..#..^.^..#.#.*..S...^
+^.^##...^.^...^.........^
+^.^..#.^###^..^..3......^
+^.###..#...#..#.....S...^
+^.......................^
+^.......***.............^
+^...*........>..........^
+^.................*.....^
+^........*..........*...^
+^.......................^
+^...***3***3**S******...^
+^................W......^
+^..*..................*.^
+#########################]]
+
+    TileTable = {}
+
+    -- parsing tiles
+    local width = #(tileString:match("[^\n]+"))
+
+    for x = 1, width, 1 do TileTable[x] = {} end
+
+    local rowIdx, colIdx = 1, 1
+
+    for row in tileString:gmatch("[^\n]+") do
+        assert(#row == width, "map is not aligned: width of row" .. tostring(rowIdx) .. ' should be ' .. tostring(width) .. ', but it is ' .. tostring(#row))
+        colIdx = 1
+        for char in row:gmatch(".") do
+            TileTable[colIdx][rowIdx] = char
+            colIdx = colIdx + 1
+        end
+        rowIdx = rowIdx + 1
+    end
+end
+
+function drawMap()
+    for columnIndex, column in ipairs(TileTable) do
+        for rowIndex, char in ipairs(column) do
+            local x,y = (columnIndex-1)*TileW, (rowIndex-1)*TileH
+            love.graphics.draw(Tileset, Quads[char], x, y)
+        end
+    end
+end
+
+function love.load()
+    loadMap()
+
 end
 
 
 function love.draw()
-    for rowIndex, row in ipairs(TileTable) do
-        for columnIndex, number in ipairs(row) do
-            local x,y = (columnIndex-1)*TileW, (rowIndex-1)*TileH
-            love.graphics.draw(Tileset, Quads[number], x, y)
-        end
-    end
+    drawMap()
+   
 end
+
+
