@@ -4,16 +4,16 @@ function love.load()
     Player = require 'player'
     Camera = require 'camera'
 
-    gameMap = sti('maps/green_greens.lua')
+    gameMap = sti('maps/test_stage.lua')
 
     -- initialize player and camera here
     player = Player.new()
     camera = Camera.new()
+    camera:setPosition(player.x + (player.width/2), player.y + (player.height/2))
 end
 
 function love.update(dt)
     player:update(dt)
-    camera:setPosition(player.x, player.y)
 end
 
 function love.draw()

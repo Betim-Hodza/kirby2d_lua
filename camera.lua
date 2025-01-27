@@ -9,7 +9,7 @@ function Camera.new()
     return self
 end
 
-function Camera:setPosistion(x, y)
+function Camera:setPosition(x, y)
     self.x = x
     self.y = y
 end
